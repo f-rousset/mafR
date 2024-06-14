@@ -27,4 +27,13 @@ r_to_torch <- function(x, py_MAF_env, device) {
   return(x)
 }
 
+control_py_env <- function(seed=NULL) {
+  py_env <- get_py_MAF_envir()
+  if( ! is.null(seed)) {
+    abyss <- py_env$torch$random$manual_seed(as.integer(seed))
+  }
+  invisible(NULL)
+}
+
+
 
