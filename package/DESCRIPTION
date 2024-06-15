@@ -1,12 +1,12 @@
 Package: mafR
 Type: Package
 Title: Interface for masked autoregressive flows 
-Description: Interfaces the Python library 'zuko'  (Rozet et al. 2022 <doi:10.5281/zenodo.7625672>).  
+Description: Interfaces the Python library 'zuko' (Rozet et al. 2022 <doi:10.5281/zenodo.7625672>).  
 Encoding: UTF-8
-Version: 1.0.1
-Date: 2024-06-13
+Version: 1.0.2
+Date: 2024-06-15
 Imports: reticulate
-Depends: R (>= 3.3.0)
+Depends: R (>= 3.6.0)
 Authors@R: c(person("Jean-Michel", "Marin", role = c("aut","cph")),
              person("François", "Rousset", role = c("aut", "cre", "cph"), email =
              "francois.rousset@umontpellier.fr", comment = c(ORCID = "0000-0003-4670-0371")) )
