@@ -4,7 +4,7 @@
   Utility to manage torch tensors
 }
 \description{
-  Utility converting an R object to a torch tensor. Its use shoudl be discouraged as it apparently creates memory management issues (on GPU at least). Hence, it is now unexported.
+  (Currently not used nor exproted) utility converting an R object to a torch tensor.
 }
 \usage{
   .r_to_torch(x, py_handle, device) 

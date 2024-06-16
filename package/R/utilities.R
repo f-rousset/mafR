@@ -26,11 +26,21 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu") {
   envir
 }
 
-# but I should avoid using this fn ?  => made private
+# Available but not used in programming:
 .r_to_torch <- function(x, py_handle, device) {
   x <- reticulate::r_to_py(x) # to numpy.ndarray...
   py_handle$py_to_torch(x, device$type)
 }
+#
+## 'memory leak' on GPU If using pure R version:
+# r_to_torch <- function(x) {
+#   x <- r_to_py(x)
+#   x <- x$copy()
+#   x <- torch$from_numpy(x)
+#   if (device != "cpu") x <- x$to(device)
+#   x <- x$float()
+#   return(x)
+# }
 
 control_py_env <- function(seed=NULL) {
   py_handle <- get_py_MAF_handle()
