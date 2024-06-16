@@ -3,7 +3,19 @@ import torch.utils.data as data
 import numpy as np
 import zuko
 
-def MAF_density_estimation(y_train, y_test, features, transforms, hidden_features, randperm, activation, max_epochs, batch_size):
+def py_to_torch(X, devtype):
+    X = np.copy(X) # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
+    X = torch.from_numpy(X) # to torch tensor...
+    X = X.to(torch.float)
+    # https://stackoverflow.com/questions/58926054/how-to-get-the-device-type-of-a-pytorch-module-conveniently
+    if devtype != "cpu":
+        X = X.to(devtype)
+        
+    return X
+
+
+def MAF_density_estimation(y_train, y_test, features, transforms, hidden_features, \
+    randperm, activation, max_epochs, batch_size, device):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the density of y
 
@@ -21,6 +33,10 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
     Returns:
     - The trained flow model.
     """
+    
+    y_train = py_to_torch(y_train, device.type)        
+    y_test = py_to_torch(y_test, device.type)        
+    
     trainloader = data.DataLoader(y_train, batch_size=batch_size, shuffle=True)
     if y_train.is_cuda:
         flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
@@ -66,7 +82,8 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
 
 
 def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, features, \
-      context, transforms, hidden_features, randperm, activation, max_epochs, batch_size):
+      context, transforms, hidden_features, randperm, activation, max_epochs, batch_size,
+      device):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the conditional density of y given x.
 
@@ -87,6 +104,12 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     Returns:
     - The trained flow model.
     """
+    
+    y_train = py_to_torch(y_train, device.type)        
+    y_test = py_to_torch(y_test, device.type)        
+    x_train = py_to_torch(x_train, device.type)        
+    x_test = py_to_torch(x_test, device.type)        
+
     trainset = data.TensorDataset(*(y_train,x_train))
     trainloader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
     if y_train.is_cuda:
@@ -132,3 +155,70 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
             break
     
     return flow
+
+def MAF_predict_cond(density, Y, cond, device):
+    """ 
+    Density(Y|condition)
+    Parameters:
+    - density: a MAF 
+    - Y: a numpy array (from reticulate::r_to_py)
+    - cond: a numpy array
+    - devtype: memory device type used by the MAF
+    """
+    # Y = Y.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
+    # Y = torch.from_numpy(Y) # to torch tensor...
+    # Y = Y.float()
+    # cond = cond.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
+    # cond = torch.from_numpy(cond) # to torch tensor...
+    # cond = cond.float()
+    # # https://stackoverflow.com/questions/58926054/how-to-get-the-device-type-of-a-pytorch-module-conveniently
+    # if devtype != "cpu":
+    #     Y = Y.to(devtype)
+    #     cond = cond.to(devtype)
+    
+    Y = py_to_torch(Y, device.type)        
+    cond = py_to_torch(cond, device.type)        
+    pred = density(cond).log_prob(Y).detach().cpu().numpy()
+    return pred
+
+def MAF_predict_nocond(density, Y, device):
+    """ 
+    Density(X)
+    Parameters:
+    - density: a MAF 
+    - Y: a numpy array (from reticulate::r_to_py)
+    - devtype: memory device type used by the MAF
+    """
+    # Y = Y.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
+    # Y = torch.from_numpy(Y) # to torch tensor...
+    # Y = Y.float()
+    # # https://stackoverflow.com/questions/58926054/how-to-get-the-device-type-of-a-pytorch-module-conveniently
+    # if devtype != "cpu":
+    #     Y = Y.to(devtype)
+        
+    Y = py_to_torch(Y, device.type)        
+
+    pred = density().log_prob(Y).detach().cpu().numpy()
+    return pred
+  
+def MAF_simulate_cond(density, nsim_as_tuple, cond, device):
+    """ 
+    simulate(Y|cond)
+    Parameters:
+    - density: a MAF 
+    - nsim_as_tuple: from reticulate::tuple
+    - given: a numpy array
+    - devtype: memory device type used by the MAF
+    """
+    # cond = cond.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
+    # cond = torch.from_numpy(cond) # to torch tensor...
+    # cond = cond.float()
+    # # https://stackoverflow.com/questions/58926054/how-to-get-the-device-type-of-a-pytorch-module-conveniently
+    # if devtype != "cpu":
+    #     cond = cond.to(devtype)
+        
+    cond = py_to_torch(cond, device.type)        
+    sim = density(cond).sample(nsim_as_tuple).cpu().numpy()
+    return sim
+
+

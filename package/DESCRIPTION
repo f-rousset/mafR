@@ -3,8 +3,8 @@ Type: Package
 Title: Interface for masked autoregressive flows 
 Description: Interfaces the Python library 'zuko' (Rozet et al. 2022 <doi:10.5281/zenodo.7625672>).  
 Encoding: UTF-8
-Version: 1.0.2
-Date: 2024-06-15
+Version: 1.0.3
+Date: 2024-06-16
 Imports: reticulate
 Depends: R (>= 3.6.0)
 Authors@R: c(person("Jean-Michel", "Marin", role = c("aut","cph")),
