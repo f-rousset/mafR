@@ -6,6 +6,7 @@
   reticulate::py_install(packages="torch", pip=TRUE) #
   reticulate::py_install(packages="zuko", pip=TRUE) #
   if (cuda) {
+    # https://rdrr.io/cran/aifeducation/src/R/install_and_config.R
     reticulate::conda_install(
       packages = c(
         "pytorch",

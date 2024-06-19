@@ -18,7 +18,7 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu") {
     envir$torch <- reticulate::import("torch")
     envir$gc <- reticulate::import("gc") # _F I X M E_ rethink
     #
-    envir$device <- envir$torch$device(torch_device) # device(type='cuda'); use its $type to test
+    envir$device <- envir$torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
     # Handle to the eval environ of main Python module:
     envir$py_main <- reticulate::import_main(convert = FALSE) 
     cat("done.\n")

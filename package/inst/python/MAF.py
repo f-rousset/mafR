@@ -41,6 +41,9 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
     if y_train.is_cuda:
         flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
                           randperm=randperm, activation=activation).cuda()
+    elif y_train.is_mps:
+        flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
+                          randperm=randperm, activation=activation).mps()
     else:
         flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
                           randperm=randperm, activation=activation)
@@ -115,6 +118,9 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     if y_train.is_cuda:
         flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
                           hidden_features=hidden_features, randperm=randperm, activation=activation).cuda()
+    elif y_train.is_mps:
+        flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
+                          hidden_features=hidden_features, randperm=randperm, activation=activation).mps()
     else:
         flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
                           hidden_features=hidden_features, randperm=randperm, activation=activation)

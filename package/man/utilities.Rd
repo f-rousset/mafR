@@ -13,10 +13,10 @@
 \arguments{
   \item{envir}{An environment (in the R sense) initialized as shown in the Examples.}
   \item{reset}{Boolean: Whether to reinitialize the Python session or not.}
-  \item{torch_device}{Character: \code{"cpu"} and \code{"cuda"} (or \code{"cuda:0"}, etc.) can be specified.}
+  \item{torch_device}{Character: \code{"cpu"}; or a GPU backend, either \code{"cuda"} (or \code{"cuda:0"}, etc.) or \code{"mps"} depending on system capabilities.}
 }
 \value{
-  \code{get_py_MAF_handle} returns the modified input environment. The source code shoudl be examined for details.
+  \code{get_py_MAF_handle} returns the modified input environment. The source code should be examined for details.
 }
 \examples{
   if (FALSE) { # A suitable Python installation is required.
