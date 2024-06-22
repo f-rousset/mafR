@@ -15,7 +15,7 @@ def py_to_torch(X, devtype):
 
 
 def MAF_density_estimation(y_train, y_test, features, transforms, hidden_features, \
-    randperm, activation, max_epochs, batch_size, device):
+    randperm, max_epochs, batch_size, device, activation=torch.nn.Tanh):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the density of y
 
@@ -85,8 +85,8 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
 
 
 def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, features, \
-      context, transforms, hidden_features, randperm, activation, max_epochs, batch_size,
-      device):
+      context, transforms, hidden_features, randperm, max_epochs, batch_size,
+      device, activation=torch.nn.Tanh):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the conditional density of y given x.
 
@@ -162,14 +162,14 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     
     return flow
 
-def MAF_predict_cond(density, Y, cond, device):
+def MAF_predict_cond(density, Y, cond, device, batchsize=4000):
     """ 
     Density(Y|condition)
     Parameters:
     - density: a MAF 
     - Y: a numpy array (from reticulate::r_to_py)
     - cond: a numpy array
-    - devtype: memory device type used by the MAF
+    - device: memory device used by the MAF
     """
     # Y = Y.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
     # Y = torch.from_numpy(Y) # to torch tensor...
@@ -181,19 +181,42 @@ def MAF_predict_cond(density, Y, cond, device):
     # if devtype != "cpu":
     #     Y = Y.to(devtype)
     #     cond = cond.to(devtype)
+    nr = Y.shape[0]
+    if (nr == 0):
+        return None
     
-    Y = py_to_torch(Y, device.type)        
     cond = py_to_torch(cond, device.type)        
-    pred = density(cond).log_prob(Y).detach().cpu().numpy()
+    Y = py_to_torch(Y, device.type)        
+    
+    nfbatch = nr // batchsize
+    chk = (nr % batchsize) > 0
+    
+    if (chk):
+        nbatch = nfbatch+1
+    else:
+        nbatch = nfbatch
+
+    if (nbatch>1):
+        pred = torch.tensor([0] * nr).to(torch.float)
+        for it in range(nfbatch): # 0 1 2...
+            rnge = range(it*batchsize, (it+1) * batchsize)
+            pred[rnge] =  density(cond).log_prob(Y[rnge, ]).detach().cpu()
+        if chk:
+            rnge = range((it+1)*batchsize, nr)
+            pred[rnge] =  density(cond).log_prob(Y[rnge, ]).detach().cpu()
+        pred = pred.numpy()
+    else:
+        pred = density(cond).log_prob(Y).detach().cpu().numpy()
+        
     return pred
 
-def MAF_predict_nocond(density, Y, device):
+def MAF_predict_nocond(density, Y, device, batchsize=4000):
     """ 
     Density(X)
     Parameters:
     - density: a MAF 
     - Y: a numpy array (from reticulate::r_to_py)
-    - devtype: memory device type used by the MAF
+    - device: memory device used by the MAF
     """
     # Y = Y.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
     # Y = torch.from_numpy(Y) # to torch tensor...
@@ -201,10 +224,33 @@ def MAF_predict_nocond(density, Y, device):
     # # https://stackoverflow.com/questions/58926054/how-to-get-the-device-type-of-a-pytorch-module-conveniently
     # if devtype != "cpu":
     #     Y = Y.to(devtype)
-        
-    Y = py_to_torch(Y, device.type)        
+    
+    nr = Y.shape[0]
+    if (nr == 0):
+        return None
 
-    pred = density().log_prob(Y).detach().cpu().numpy()
+        
+    Y = py_to_torch(Y, device.type) 
+    nfbatch = nr // batchsize
+    chk = (nr % batchsize) > 0
+    
+    if (chk):
+        nbatch = nfbatch+1
+    else:
+        nbatch = nfbatch
+
+    if (nbatch>1):
+        pred = torch.tensor([0] * nr).to(torch.float)
+        for it in range(nfbatch): # 0 1 2...
+            rnge = range(it*batchsize, (it+1) * batchsize)
+            pred[rnge] =  density().log_prob(Y[rnge, ]).detach().cpu()
+        if chk:
+            rnge = range((it+1)*batchsize, nr)
+            pred[rnge] =  density().log_prob(Y[rnge, ]).detach().cpu()
+        pred = pred.numpy()
+    else:
+        pred = density().log_prob(Y).detach().cpu().numpy()
+
     return pred
   
 def MAF_simulate_cond(density, nsim_as_tuple, cond, device):
@@ -214,7 +260,7 @@ def MAF_simulate_cond(density, nsim_as_tuple, cond, device):
     - density: a MAF 
     - nsim_as_tuple: from reticulate::tuple
     - given: a numpy array
-    - devtype: memory device type used by the MAF
+    - device: memory device used by the MAF
     """
     # cond = cond.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
     # cond = torch.from_numpy(cond) # to torch tensor...
@@ -227,4 +273,23 @@ def MAF_simulate_cond(density, nsim_as_tuple, cond, device):
     sim = density(cond).sample(nsim_as_tuple).cpu().numpy()
     return sim
 
+def MAF_transform(density, Y, device):
+    """ 
+    This returns the transformed points.
+    This can be used to diagnose the training, 
+    as the result should be ~ gaussian(O,I) for train set.
+    Parameters:
+    - density: a MAF 
+    - Y: a numpy array (from reticulate::r_to_py)
+    - device: memory device used by the MAF
+    """
+    nr = Y.shape[0]
+    if (nr == 0):
+        return None
+
+    Y = py_to_torch(Y, device.type) 
+    trsf = density().transform(Y).detach().cpu().numpy()
+
+    return trsf
+  
 

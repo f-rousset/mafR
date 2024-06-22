@@ -4,7 +4,7 @@
   Utility to manage torch tensors
 }
 \description{
-  (Currently not used nor exproted) utility converting an R object to a torch tensor.
+  (Currently not used nor exported) utility converting an R object to a torch tensor.
 }
 \usage{
   .r_to_torch(x, py_handle, device) 

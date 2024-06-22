@@ -3,7 +3,8 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu") {
   if (reset || ! envir$is_set) {
     cat("\nInitializing python session... ")
     MAF_density_estimation <- MAF_conditional_density_estimation <- 
-      MAF_predict_cond <- MAF_predict_nocond <- MAF_simulate_cond <- py_to_torch <- NULL
+      MAF_predict_cond <- MAF_predict_nocond <- MAF_simulate_cond <- 
+      MAF_transform <- py_to_torch <- NULL
     # reticulate::source_python(paste0(Infusion::projpath(),"/../MAF-R/MAF.py"))
     infile <- system.file('python', "MAF.py", package='mafR')
     reticulate::source_python(infile)
@@ -12,13 +13,20 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu") {
     envir$MAF_predict_cond <- MAF_predict_cond
     envir$MAF_predict_nocond <- MAF_predict_nocond
     envir$MAF_simulate_cond <- MAF_simulate_cond
+    envir$MAF_transform <- MAF_transform
     envir$py_to_torch <- py_to_torch
     envir$is_set <- TRUE
     ## Python packages to be called from R
-    envir$torch <- reticulate::import("torch")
-    envir$gc <- reticulate::import("gc") # _F I X M E_ rethink
+    torch <- envir$torch <- reticulate::import("torch")
+    # envir$gc <- reticulate::import("gc") 
     #
-    envir$device <- envir$torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
+    envir$device <- torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
+    if (length(grep("cuda",torch_device))) {
+      envir$gpu_memory <- torch$cuda$mem_get_info() # for current device: available and total dedicated GPU memory
+    } else if (length(grep("mps",torch_device))) {
+      envir$gpu_memory <- c(torch$mps$current_allocated_memory(),
+                            torch$mps$driver_allocated_memory())
+    }
     # Handle to the eval environ of main Python module:
     envir$py_main <- reticulate::import_main(convert = FALSE) 
     cat("done.\n")
