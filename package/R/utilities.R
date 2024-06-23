@@ -1,10 +1,22 @@
+.get_GPU_mem <- function(GPU_mem, torch_device, get_gpu_info) {
+  if (length(grep("cuda",torch_device))) {
+    GPU_mem <- get_gpu_info("cuda") # for current device: available and total dedicated GPU memory
+    ## => This appeared to fail but only bc R handles only 32-bit ints.
+  } else if (length(grep("mps",torch_device))) {
+    GPU_mem <- get_gpu_info("mps") # for current device: available and total dedicated GPU memory
+  } else {
+    if (missing(GPU_mem) || is.null(GPU_mem)) stop("Please specify 'GPU_mem'.")
+    if (length(GPU_mem)==1L) GPU_mem <- c(NA_real_,GPU_mem) 
+  }
+  unlist(GPU_mem)
+}
 
-get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu") {
+get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NULL) {
   if (reset || ! envir$is_set) {
     cat("\nInitializing python session... ")
     MAF_density_estimation <- MAF_conditional_density_estimation <- 
       MAF_predict_cond <- MAF_predict_nocond <- MAF_simulate_cond <- 
-      MAF_transform <- py_to_torch <- NULL
+      MAF_transform <- py_to_torch <- get_gpu_info <- NULL
     # reticulate::source_python(paste0(Infusion::projpath(),"/../MAF-R/MAF.py"))
     infile <- system.file('python', "MAF.py", package='mafR')
     reticulate::source_python(infile)
@@ -15,18 +27,15 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu") {
     envir$MAF_simulate_cond <- MAF_simulate_cond
     envir$MAF_transform <- MAF_transform
     envir$py_to_torch <- py_to_torch
+    # the Python source has also provided get_gpu_info(), used below only.
     envir$is_set <- TRUE
     ## Python packages to be called from R
     torch <- envir$torch <- reticulate::import("torch")
     # envir$gc <- reticulate::import("gc") 
     #
     envir$device <- torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
-    if (length(grep("cuda",torch_device))) {
-      envir$gpu_memory <- torch$cuda$mem_get_info() # for current device: available and total dedicated GPU memory
-    } else if (length(grep("mps",torch_device))) {
-      envir$gpu_memory <- c(torch$mps$current_allocated_memory(),
-                            torch$mps$driver_allocated_memory())
-    }
+    if (is.null(GPU_mem) && torch_device != "cpu") envir$gpu_memory <- 
+      .get_GPU_mem(GPU_mem, torch_device, get_gpu_info)
     # Handle to the eval environ of main Python module:
     envir$py_main <- reticulate::import_main(convert = FALSE) 
     cat("done.\n")
@@ -50,8 +59,7 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu") {
 #   return(x)
 # }
 
-control_py_env <- function(seed=NULL) {
-  py_handle <- get_py_MAF_handle()
+control_py_env <- function(py_handle, seed=NULL) {
   if( ! is.null(seed)) {
     abyss <- py_handle$torch$random$manual_seed(as.integer(seed))
   }

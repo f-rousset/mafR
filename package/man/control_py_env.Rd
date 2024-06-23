@@ -8,10 +8,14 @@ Interface to control variables in a Python environment possibly used by Infusion
 Currently the only implemented control is that of the \pkg{torch} random seed.  
 }
 \usage{
-control_py_env(seed = NULL)
+control_py_env(py_handle, seed = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{py_handle}{
+    An R environment that provides access to a Python evaluation environment,
+    as produced  by \code{\link{get_py_MAF_handle}}
+  }
   \item{seed}{
 Numeric: passed (as integer value) to \code{torch.random.manual_seed}.
 }
@@ -20,6 +24,12 @@ Numeric: passed (as integer value) to \code{torch.random.manual_seed}.
 Returns NULL invisibly.
 }
 \examples{
-## This requires a Python installation accessible through 'reticulate'.
-# control_py_env(seed=0L)
+\dontrun{ # This requires a Python installation accessible through 'reticulate'.
+
+my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
+## Initialization of Python session:
+py_handle <- get_py_MAF_handle(my_env, reset=FALSE, torch_device="cpu")
+# 
+control_py_env(py_handle, seed=0L)
+}
 }

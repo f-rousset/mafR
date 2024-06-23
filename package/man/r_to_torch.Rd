@@ -20,7 +20,7 @@
   \code{r_to_torch} returns a 32-bit floating-point \pkg{torch} tensor allocated on the given \code{device}.
 }
 \examples{
-  if (FALSE) { # A suitable Python installation is required.
+\dontrun{ # A suitable Python installation is required.
   
     my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
     # Initialization of Python session:

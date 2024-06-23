@@ -7,19 +7,20 @@
   Utility initializing a Python environment for running \code{zuko.flows.MAF} and retrieving it.
 }
 \usage{
-  get_py_MAF_handle(envir, reset=FALSE, torch_device="cpu")
+  get_py_MAF_handle(envir, reset=FALSE, torch_device="cpu", GPU_mem=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{envir}{An environment (in the R sense) initialized as shown in the Examples.}
   \item{reset}{Boolean: Whether to reinitialize the Python session or not.}
   \item{torch_device}{Character: \code{"cpu"}; or a GPU backend, either \code{"cuda"} (or \code{"cuda:0"}, etc.) or \code{"mps"} depending on system capabilities.}
+  \item{GPU_mem}{For development purposes (effect is complicated). An amount of (dedicated) GPU memory, in bytes.}
 }
 \value{
   \code{get_py_MAF_handle} returns the modified input environment. The source code should be examined for details.
 }
 \examples{
-  if (FALSE) { # A suitable Python installation is required.
+\dontrun{ # A suitable Python installation is required.
   
     my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
     # Initialization of Python session:
@@ -29,5 +30,5 @@
     my_env$device # the torch_device
     # and to internal definitions for MAF training 
     
-  }
+}
 }

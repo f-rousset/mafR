@@ -13,6 +13,14 @@ def py_to_torch(X, devtype):
         
     return X
 
+def get_gpu_info(devtype):
+    if devtype == "cuda":
+        longint_tuple = torch.cuda.mem_get_info()
+    elif devtype == "mps":
+        lontint_tuple = tuple(torch.mps.current_allocated_memory(),
+                              torch.mps.driver_allocated_memory())
+    return tuple(map(float, longint_tuple)) # bc R only handles "short" integers
+
 
 def MAF_density_estimation(y_train, y_test, features, transforms, hidden_features, \
     randperm, max_epochs, batch_size, device, activation=torch.nn.Tanh):
