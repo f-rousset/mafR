@@ -261,13 +261,17 @@ def MAF_predict_nocond(density, Y, device, batchsize=4000):
 
     return pred
   
-def MAF_simulate_cond(density, nsim_as_tuple, cond, device):
+def MAF_simulate_cond(density, nsim_as_tuple, cond, device, batchsize=4000):
     """ 
     simulate(Y|cond)
     Parameters:
     - density: a MAF 
     - nsim_as_tuple: from reticulate::tuple
-    - given: a numpy array
+    - cond: a 1-row numpy array;
+        density(<  >1-row cond array >).sample((nsim >1,)).cpu() 
+      would produce a 3d array (nsim, n_cond, event_size)
+      This fn may not yet fully handle this case and the calling R code may prevent it. 
+      To get 1 sample for each of several given's: density(< cond array >).sample((1,)).cpu()
     - device: memory device used by the MAF
     """
     # cond = cond.copy() # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
@@ -277,8 +281,32 @@ def MAF_simulate_cond(density, nsim_as_tuple, cond, device):
     # if devtype != "cpu":
     #     cond = cond.to(devtype)
         
-    cond = py_to_torch(cond, device.type)        
-    sim = density(cond).sample(nsim_as_tuple).cpu().numpy()
+    cond = py_to_torch(cond, device.type)   
+    cond = cond[0, ] # drops dim; otherwise sample() will generate a 3D array 
+                     # with nsim (or) batchsize samples for each line of cond
+    nsim = nsim_as_tuple[0]
+    nfbatch = nsim // batchsize
+    chk_n = nsim % batchsize
+    chk = chk_n > 0
+    
+    if (chk):
+        nbatch = nfbatch+1
+    else:
+        nbatch = nfbatch
+
+    nc = postdens().event_shape[0] # guessed this by seeking source for 'sample' in zuko and looking around
+    if (nbatch>1):
+        sim = torch.tensor([0] * (nsim*nc)).to(torch.float)
+        sim = sim.view(nsim, nc)
+        for it in range(nfbatch): # 0 1 2...
+            rnge = range(it*batchsize, (it+1) * batchsize)
+            sim[rnge, ] =  density(cond).sample((batchsize,)).cpu()
+        if chk:
+            rnge = range((it+1)*batchsize, nsim)
+            sim[rnge, ] =  density(cond).sample((chk_n,)).cpu()
+        sim = sim.numpy()
+    else:
+        sim = density(cond).sample(nsim_as_tuple).cpu().numpy()
     return sim
 
 def MAF_transform(density, Y, device):
