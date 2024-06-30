@@ -21,3 +21,11 @@
     Itorch$tensor(1, device = "cuda")
   }
 }
+
+## To select version in conda_install, use '==':
+# reticulate::conda_install(
+#   packages = c(
+#     "zuko",
+#     paste0("zuko","==","1.2.0")),
+#   conda = "auto",
+#   pip = TRUE)
