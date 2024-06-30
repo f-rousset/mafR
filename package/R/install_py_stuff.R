@@ -1,10 +1,11 @@
-.install_py_stuff <- function(cuda=FALSE) {
+# For comments on wsl see infos in my langages/wsl/ subdir
+.install_py_stuff <- function(cuda=FALSE, pip=TRUE, test_cuda=cuda) {
   reticulate::install_miniconda() # should be able to control the path?
-  reticulate::py_install(packages="scikit-learn", pip=TRUE) # to import *sklearn*
-  reticulate::py_install(packages="matplotlib", pip=TRUE) # 
-  reticulate::py_install(packages="plotnine", pip=TRUE) # 
-  reticulate::py_install(packages="torch", pip=TRUE) #
-  reticulate::py_install(packages="zuko", pip=TRUE) #
+  reticulate::py_install(packages="scikit-learn", pip=pip) # to import *sklearn*
+  reticulate::py_install(packages="matplotlib", pip=pip) # 
+  reticulate::py_install(packages="plotnine", pip=pip) # 
+  reticulate::py_install(packages="torch", pip=pip) #
+  reticulate::py_install(packages="zuko", pip=pip) #
   if (cuda) {
     # https://rdrr.io/cran/aifeducation/src/R/install_and_config.R
     reticulate::conda_install(
@@ -14,5 +15,9 @@
       channel=c("pytorch","nvidia"),
       conda = "auto",
       pip = FALSE)
+  }
+  if (test_cuda) {
+    Itorch <- reticulate::import("torch")
+    Itorch$tensor(1, device = "cuda")
   }
 }

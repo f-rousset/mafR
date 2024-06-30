@@ -25,6 +25,10 @@ A suitable Python installation is required. Here is a possible installation proc
       channel=c("pytorch","nvidia"),
       conda = "auto",
       pip = FALSE)
+    { # To test that cuda can be used:
+      Itorch <- reticulate::import("torch")
+      Itorch$tensor(1, device = "cuda")
+    }  
   }
 
 }

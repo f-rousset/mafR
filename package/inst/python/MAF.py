@@ -1,3 +1,5 @@
+# https://zuko.readthedocs.io/en/stable/tutorials/basics.html
+
 import torch
 import torch.utils.data as data
 import numpy as np
@@ -23,7 +25,8 @@ def get_gpu_info(devtype):
 
 
 def MAF_density_estimation(y_train, y_test, features, transforms, hidden_features, \
-    randperm, max_epochs, batch_size, device, activation=torch.nn.Tanh):
+    randperm, max_epochs, batch_size, device, activation=torch.nn.Tanh, \
+    patience = 20):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the density of y
 
@@ -59,7 +62,6 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
     optimizer = torch.optim.Adam(flow.parameters(), lr=1e-3)
 
     best_loss = float('inf')
-    patience = 20
     patience_counter = 0
 
     for epoch in range(max_epochs):
@@ -94,7 +96,8 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
 
 def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, features, \
       context, transforms, hidden_features, randperm, max_epochs, batch_size,
-      device, activation=torch.nn.Tanh):
+      device, activation=torch.nn.Tanh, \
+    patience = 20):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the conditional density of y given x.
 
@@ -136,7 +139,6 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     optimizer = torch.optim.Adam(flow.parameters(), lr=1e-3)
 
     best_loss = float('inf')
-    patience = 20
     patience_counter = 0
 
     for epoch in range(max_epochs):
