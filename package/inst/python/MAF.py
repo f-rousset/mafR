@@ -210,10 +210,10 @@ def MAF_predict_cond(density, Y, cond, device, batchsize=4000):
         pred = torch.tensor([0] * nr).to(torch.float)
         for it in range(nfbatch): # 0 1 2...
             rnge = range(it*batchsize, (it+1) * batchsize)
-            pred[rnge] =  density(cond).log_prob(Y[rnge, ]).detach().cpu()
+            pred[rnge] =  density(cond[rnge, ]).log_prob(Y[rnge, ]).detach().cpu()
         if chk:
             rnge = range((it+1)*batchsize, nr)
-            pred[rnge] =  density(cond).log_prob(Y[rnge, ]).detach().cpu()
+            pred[rnge] =  density(cond[rnge, ]).log_prob(Y[rnge, ]).detach().cpu()
         pred = pred.numpy()
     else:
         pred = density(cond).log_prob(Y).detach().cpu().numpy()

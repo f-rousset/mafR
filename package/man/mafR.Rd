@@ -6,9 +6,10 @@
 
 \title{Interface for masked autoregressive flows}
 
-\description{This wraps Python procedures to train Masked Autoregressive Flows (MAFs, Paramakarios et al. 2017) using the Python package \code{zuko}. 
+\description{This wraps Python procedures to train Masked Autoregressive Flows (MAFs, Paramakarios et al. 2017) using the Python package \code{zuko}. It has been tested with version 1.1.0 and 1.2.0 of that package.
 
-A suitable Python installation is required. Here is a possible installation procedure:
+A suitable Python installation is required. Below is a possible installation procedure which has worked under Windows, and under the WSL2-Ubuntu under Windows (although on the WSL, additional steps are necessary so that \code{torch} can find \code{libstdc++}, and to make \code{cuda} to work), so that it may be reasonably portable.
+
 \preformatted{
   reticulate::install_miniconda() # should be able to control the path?
   reticulate::py_install(packages="scikit-learn", pip=TRUE) # to import *sklearn*
