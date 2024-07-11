@@ -296,7 +296,7 @@ def MAF_simulate_cond(density, nsim_as_tuple, cond, device, batchsize=4000):
     else:
         nbatch = nfbatch
 
-    nc = postdens().event_shape[0] # guessed this by seeking source for 'sample' in zuko and looking around
+    nc = density().event_shape[0] # guessed this by seeking source for 'sample' in zuko and looking around
     if (nbatch>1):
         sim = torch.tensor([0] * (nsim*nc)).to(torch.float)
         sim = sim.view(nsim, nc)
