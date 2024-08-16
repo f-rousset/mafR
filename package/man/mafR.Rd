@@ -41,10 +41,12 @@ The last import may fail on linux with message
 If so, seek the libstdc++ library in the r-reticulate architecture (something like
 \code{/home/<MY_USER_NAME>/.local/share/r-miniconda/lib/libstdc++.so.6.0.29}),
 and either create a symbolic link to it 
-as \code{libstdc++.so.6} in (likely path) \code{/usr/lib/x86_64-linux-gnu/} ,
+as \code{libstdc++.so.6} in (likely path) \code{/usr/lib/x86_64-linux-gnu/},
+% sudo ln -sf /home/francois/.local/share/r-miniconda/lib/libstdc++.so.6.0.29 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
 or change the PATH variable:
-\code{export LD_LIBRARY_PATH=/home/<MY_USER_NAME>/.local/share/r-miniconda/lib/:$LD_LIBRARY_PATH} .
-
+\code{export LD_LIBRARY_PATH=/home/<MY_USER_NAME>/.local/share/r-miniconda/lib/:$LD_LIBRARY_PATH}.
+% export LD_LIBRARY_PATH=/home/francois/.local/share/r-miniconda/lib/:$LD_LIBRARY_PATH
+ON the WSL, I found that the symbolic link is overwritten each time the WSL is restarted.  
 }
 
 \references{

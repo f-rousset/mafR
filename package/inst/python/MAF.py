@@ -26,7 +26,7 @@ def get_gpu_info(devtype):
 
 def MAF_density_estimation(y_train, y_test, features, transforms, hidden_features, \
     randperm, max_epochs, batch_size, device, activation=torch.nn.Tanh, \
-    patience = 20):
+    patience = 20, learning_rate=1e-3):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the density of y
 
@@ -34,12 +34,16 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
     - y_train: The training dataset.
     - y_test: The validation dataset.
     - features: The dimension of y.
-    - transforms: The number of transformation blocks in the MAF.
+    - transforms: The number of transformation blocks in the MAF 
+       ('autoregressive layers', K, in PPM 17).
+    - hidden_features: A tuple defining the hidden layer sizes in the MAF 
+        (elements are H in PPM17, length is number of hidden layers L).
     - hidden_features: A tuple defining the hidden layer sizes in the MAF.
     - randperm: Whether to use random permutation.
     - activation: The activation function to use in the MAF.
     - max_epochs: The maximum number of epochs to train for.
-    - batch_size: The batch size to use during training.
+    - batch_size: The batch size to use during training;
+    - learning_rate: of Adam optimizer.
 
     Returns:
     - The trained flow model.
@@ -59,7 +63,7 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
         flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
                           randperm=randperm, activation=activation)
                           
-    optimizer = torch.optim.Adam(flow.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(flow.parameters(), lr=learning_rate)
 
     best_loss = float('inf')
     patience_counter = 0
@@ -97,7 +101,7 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
 def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, features, \
       context, transforms, hidden_features, randperm, max_epochs, batch_size,
       device, activation=torch.nn.Tanh, \
-    patience = 20):
+    patience = 20, learning_rate=1e-3):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the conditional density of y given x.
 
@@ -108,12 +112,15 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     - x_test: The validation dataset for x.
     - features: The dimension of y.
     - context: The dimension of x.
-    - transforms: The number of transformation blocks in the MAF.
-    - hidden_features: A tuple defining the hidden layer sizes in the MAF.
+    - transforms: The number of transformation blocks in the MAF 
+       ('autoregressive layers', K, in PPM 17).
+    - hidden_features: A tuple defining the hidden layer sizes in the MAF 
+        (elements are H in PPM17, length is number of hidden layers L).
     - randperm: Whether to use random permutation.
     - activation: The activation function to use in the MAF.
     - max_epochs: The maximum number of epochs to train for.
     - batch_size: The batch size to use during training.
+    - learning_rate: of Adam optimizer. 
 
     Returns:
     - The trained flow model.
@@ -136,7 +143,7 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
         flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
                           hidden_features=hidden_features, randperm=randperm, activation=activation)
 
-    optimizer = torch.optim.Adam(flow.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(flow.parameters(), lr=learning_rate)
 
     best_loss = float('inf')
     patience_counter = 0
