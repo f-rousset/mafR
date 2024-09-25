@@ -24,12 +24,9 @@ Numeric: passed (as integer value) to \code{torch.random.manual_seed}.
 Returns NULL invisibly.
 }
 \examples{
-\dontrun{ # This requires a Python installation accessible through 'reticulate'.
-
-my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
 ## Initialization of Python session:
+my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
 py_handle <- get_py_MAF_handle(my_env, reset=FALSE, torch_device="cpu")
-# 
-control_py_env(py_handle, seed=0L)
-}
+
+if (inherits(py_handle,"environment"))  control_py_env(py_handle, seed=0L)
 }

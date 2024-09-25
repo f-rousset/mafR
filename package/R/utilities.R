@@ -11,34 +11,40 @@
   unlist(GPU_mem)
 }
 
-get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NULL) {
+get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NULL,
+                              verbose=TRUE) {
   if (reset || ! envir$is_set) {
-    cat("\nInitializing python session... ")
+    if (verbose) cat("\nInitializing python session... ")
     MAF_density_estimation <- MAF_conditional_density_estimation <- 
       MAF_predict_cond <- MAF_predict_nocond <- MAF_simulate_cond <- 
       MAF_transform <- py_to_torch <- get_gpu_info <- NULL
     # reticulate::source_python(paste0(Infusion::projpath(),"/../MAF-R/MAF.py"))
+    
     infile <- system.file('python', "MAF.py", package='mafR')
-    reticulate::source_python(infile)
-    envir$MAF_density_estimation <- MAF_density_estimation
-    envir$MAF_conditional_density_estimation <- MAF_conditional_density_estimation
-    envir$MAF_predict_cond <- MAF_predict_cond
-    envir$MAF_predict_nocond <- MAF_predict_nocond
-    envir$MAF_simulate_cond <- MAF_simulate_cond
-    envir$MAF_transform <- MAF_transform
-    envir$py_to_torch <- py_to_torch
-    # the Python source has also provided get_gpu_info(), used below only.
-    envir$is_set <- TRUE
-    ## Python packages to be called from R
-    torch <- envir$torch <- reticulate::import("torch")
-    # envir$gc <- reticulate::import("gc") 
-    #
-    envir$device <- torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
-    if (is.null(GPU_mem) && torch_device != "cpu") envir$gpu_memory <- 
-      .get_GPU_mem(GPU_mem, torch_device, get_gpu_info)
-    # Handle to the eval environ of main Python module:
-    envir$py_main <- reticulate::import_main(convert = FALSE) 
-    cat("done.\n")
+    chk <- try(reticulate::source_python(infile))
+    if (inherits(chk,"try-error")) {
+      message("you need a proprely set up python environment to use 'mafR'.")
+      return(attr(chk,"condition")$message)
+    } else {
+      envir$MAF_density_estimation <- MAF_density_estimation
+      envir$MAF_conditional_density_estimation <- MAF_conditional_density_estimation
+      envir$MAF_predict_cond <- MAF_predict_cond
+      envir$MAF_predict_nocond <- MAF_predict_nocond
+      envir$MAF_simulate_cond <- MAF_simulate_cond
+      envir$MAF_transform <- MAF_transform
+      envir$py_to_torch <- py_to_torch
+      # the Python source has also provided get_gpu_info(), used below only.
+      envir$is_set <- TRUE
+      ## Python packages to be called from R
+      torch <- envir$torch <- reticulate::import("torch")
+      envir$device <- torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
+      if (is.null(GPU_mem) && torch_device != "cpu") envir$gpu_memory <- 
+        .get_GPU_mem(GPU_mem, torch_device, get_gpu_info)
+      # Handle to the eval environ of main Python module:
+      envir$py_main <- reticulate::import_main(convert = FALSE) 
+      if (verbose) cat("done.\n")
+      envir
+    }
   }
   envir
 }

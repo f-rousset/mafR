@@ -9,12 +9,12 @@ The following installation procedure using \pkg{reticulate} may be reasonably po
 % D:/home/francois/travail/stats/Infusionplus/mafR/package/R/install_py_stuff.R
 % for more details
 \preformatted{
-reticulate::install_miniconda() # should be able to control the path?
+reticulate::install_miniconda() 
 reticulate::py_install(packages="scikit-learn", pip=TRUE) # to import *sklearn*
-reticulate::py_install(packages="matplotlib", pip=TRUE) # 
-reticulate::py_install(packages="plotnine", pip=TRUE) # 
-reticulate::py_install(packages="torch", pip=TRUE) #
-reticulate::py_install(packages="zuko", pip=TRUE) #
+reticulate::py_install(packages="matplotlib", pip=TRUE)  
+reticulate::py_install(packages="plotnine", pip=TRUE)  
+reticulate::py_install(packages="torch", pip=TRUE) 
+reticulate::py_install(packages="zuko", pip=TRUE) 
 
 # To allow use of cuda:
 reticulate::conda_install(
