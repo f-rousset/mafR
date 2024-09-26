@@ -1,6 +1,8 @@
+Very fresh on [![CRAN](http://www.r-pkg.org/badges/version/mafR)](https://cran.r-project.org/web/packages/mafR)
+
 This package allows one to call from R the implementation of Masked Autoregressive Flows (MAFs) in the `zuko` python package ([Rozet et al. 2023](dx.doi.org/10.5281/zenodo.7625672)).
 It has been designed more specifically for use with the [`Infusion` R package](gitlab.mbb.univ-montp2.fr/francois/Infusion).
-Although the `mafR` package is trivial to install, you will need to install a Python environment with appropriate packages in order to be able to use `mafR`.
+Although the installation of the `mafR` package is trivial, you will need to install a Python environment with appropriate packages in order to be able to use `mafR`.
 See the installation instructions in the main documentation page for `mafR`. 
 
 Then, you should be able to call MAFs when using `Infusion` for simulation-based inference, as illustrated by the following toy example:
