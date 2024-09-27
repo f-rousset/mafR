@@ -1,4 +1,4 @@
-Very fresh on [![CRAN](http://www.r-pkg.org/badges/version/mafR)](https://cran.r-project.org/web/packages/mafR)
+[![CRAN](https://www.r-pkg.org/badges/version-ago/mafR)](https://cran.r-project.org/web/packages/mafR)
 
 This package allows one to call from R the implementation of Masked Autoregressive Flows (MAFs) in the `zuko` python package ([Rozet et al. 2023](dx.doi.org/10.5281/zenodo.7625672)).
 It has been designed more specifically for use with the [`Infusion` R package](gitlab.mbb.univ-montp2.fr/francois/Infusion).
@@ -36,7 +36,7 @@ Then, you should be able to call MAFs when using `Infusion` for simulation-based
   parsp <- cbind(parsp)
   simuls <- add_reftable(Simulate="myrnorm3", parsTable=parsp)
 ```
-##### Perform initial inference of likelihood surface (note  using="mafR"):
+##### Perform initial inference of likelihood surface (note  `using="mafR"`):
 ```  
   densv <- infer_SLik_joint(simuls,stat.obs=Sobs, using="mafR")  
 ```
