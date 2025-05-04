@@ -6,9 +6,9 @@
 
 \title{Interface for masked autoregressive flows}
 
-\description{This wraps Python procedures to train Masked Autoregressive Flows (MAFs, Paramakarios et al. 2017) using the Python package \code{zuko}. It has been tested with version 1.1.0 and 1.2.0 of that package. Note that objects created by its version 1.2.0 cannot be read with its version 1.1.0 (i.e., when saved in and read from \code{pickle} files).
+\description{This wraps Python procedures to train Masked Autoregressive Flows (MAFs, Paramakarios et al. 2017) using the Python package \code{zuko}. It has been tested with version 1.1.0, 1.2.0 and 1.4.0 of that package. Note that objects created by its version 1.2.0 cannot be read with its version 1.1.0 (i.e., when saved in and read from \code{pickle} files).
 
-The simplest portable way to get \pkg{mafR} working may be to install it in a conda environment. Below is a complete installation recipe. More information about alternative installation procedure may be found on the Git repository for \pkg{mafR}, \url{https://github.com/f-rousset/mafR}.
+The simplest portable way to get \pkg{mafR} working may be to install it in a conda environment. Below is a complete installation recipe. Alternative installation procedures (notably, using \pkg{reticulate} functions) \emph{may} be found in files not necessarily included in this package but available on its Git repository, \url{https://github.com/f-rousset/mafR}.
 
 \preformatted{
 mkdir -p ~/miniconda3

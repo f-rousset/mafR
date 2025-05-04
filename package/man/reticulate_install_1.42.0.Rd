@@ -1,26 +1,32 @@
-\name{mafR-no-condaenv}
-\alias{mafR-no-condaenv}
+\name{reticulate-install-1.42.0}
+\alias{reticulate-install-1.42.0}
 
-\title{Recipe for installation out of a conda environment}
+\title{Recipe for installation out of a conda environment using \code{py_require}}
 
 \description{
-The following installation procedure using \pkg{reticulate} may be reasonably portable, as it has worked under Windows, under a linux cluster running on Fedora v.8.8, and under the WSL2-Ubuntu under Windows. On the WSL, additional steps are necessary to make \code{cuda} to work and one may need to reset the \code{libstdc++.so.6} symbolic link each time the WSL is launched.
+The following installation procedure has worked under Windows with \pkg{reticulate} 1.42.2.
 % see commented script in 
-% D:/home/francois/travail/stats/Infusionplus/mafR/package/R/install_py_stuff.R
-% for more details
+% D:/home/francois/travail/stats/Infusionplus/mafR/package/R/reticulate_install_1.42.0.R
+% for possibly more details.
 \preformatted{
 reticulate::install_miniconda() 
-reticulate::py_install(packages="scikit-learn", pip=TRUE) # to import *sklearn*
-reticulate::py_install(packages="matplotlib", pip=TRUE)  
-reticulate::py_install(packages="plotnine", pip=TRUE)  
-reticulate::py_install(packages="torch", pip=TRUE) 
-reticulate::py_install(packages="zuko", pip=TRUE) 
-
+Sys.setenv(
+    "UV_INDEX" = 
+      trimws(paste(sep = " ",
+                   "https://download.pytorch.org/whl/cu121",
+                   Sys.getenv("UV_INDEX")
+      )))
+reticulate::py_require(packages="scikit-learn") # to import *sklearn*
+reticulate::py_require(packages="matplotlib") # 
+reticulate::py_require(packages="plotnine") # 
+reticulate::py_require(c("tensorflow", "torch", "torchvision", "torchaudio"))
+reticulate::py_require(packages="zuko") #
+  
 # To allow use of cuda:
 reticulate::conda_install(
     packages = c(
       "pytorch",
-      paste0("pytorch-cuda","=","12.1")),
+      paste0("pytorch-cuda","=","12.1")), # for GPU requiring cuda 12.1
     channel=c("pytorch","nvidia"),
     conda = "auto",
     pip = FALSE)
