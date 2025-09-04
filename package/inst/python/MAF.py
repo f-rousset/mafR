@@ -26,7 +26,7 @@ def get_gpu_info(devtype):
 
 def MAF_density_estimation(y_train, y_test, features, transforms, hidden_features, \
     randperm, max_epochs, batch_size, device, activation=torch.nn.Tanh, \
-    patience = 20, learning_rate=1e-3):
+    patience = 20, learning_rate=1e-3, distribution='base', frozen_base=True, **kwargs):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the density of y
 
@@ -44,6 +44,10 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
     - max_epochs: The maximum number of epochs to train for.
     - batch_size: The batch size to use during training;
     - learning_rate: of Adam optimizer.
+    - distribution: the base density of the MAF (PPM 17, section 2.2).
+    - frozen_base: whether to adjust the base density during the training.
+    - **kwargs are used as sinkhole for any additional argument passed in the call,
+        allowing compatibility with different version of the calling code.
 
     Returns:
     - The trained flow model.
@@ -53,15 +57,19 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
     y_test = py_to_torch(y_test, device.type)        
     
     trainloader = data.DataLoader(y_train, batch_size=batch_size, shuffle=True)
-    if y_train.is_cuda:
-        flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
-                          randperm=randperm, activation=activation).cuda()
-    elif y_train.is_mps:
-        flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
-                          randperm=randperm, activation=activation).mps()
-    else:
-        flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
-                          randperm=randperm, activation=activation)
+    
+    flow = zuko.flows.MAF(features=features, transforms=transforms, hidden_features=hidden_features, 
+                              randperm=randperm, activation=activation)
+        
+    if distribution.__class__.__name__ == 'GMM':
+        flow.base = distribution
+
+    if frozen_base:
+        # Freeze the base distribution parameters
+        for param in flow.base.parameters():
+            param.requires_grad = False
+
+    flow = flow.to(device.type)                          
                           
     optimizer = torch.optim.Adam(flow.parameters(), lr=learning_rate)
 
@@ -100,8 +108,8 @@ def MAF_density_estimation(y_train, y_test, features, transforms, hidden_feature
 
 def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, features, \
       context, transforms, hidden_features, randperm, max_epochs, batch_size,
-      device, activation=torch.nn.Tanh, \
-    patience = 20, learning_rate=1e-3):
+      device, activation=torch.nn.Tanh, patience = 20, learning_rate=1e-3, \
+    distribution='base', frozen_base=True, **kwargs):
     """
     Train a Masked Autoregressive Flow (MAF) model to estimate the conditional density of y given x.
 
@@ -121,6 +129,10 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     - max_epochs: The maximum number of epochs to train for.
     - batch_size: The batch size to use during training.
     - learning_rate: of Adam optimizer. 
+    - distribution: the base density of the MAF (PPM 17, section 2.2).
+    - frozen_base: whether to adjust the base density during the training.
+    - **kwargs are used as sinkhole for any additional argument passed in the call,
+        allowing compatibility with different version of the calling code.
 
     Returns:
     - The trained flow model.
@@ -133,15 +145,18 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
 
     trainset = data.TensorDataset(*(y_train,x_train))
     trainloader = data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    if y_train.is_cuda:
-        flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
-                          hidden_features=hidden_features, randperm=randperm, activation=activation).cuda()
-    elif y_train.is_mps:
-        flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
-                          hidden_features=hidden_features, randperm=randperm, activation=activation).mps()
-    else:
-        flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
+    flow = zuko.flows.MAF(features=features, context=context, transforms=transforms, \
                           hidden_features=hidden_features, randperm=randperm, activation=activation)
+
+    if distribution.__class__.__name__ == 'GMM':
+        flow.base = distribution
+
+    if frozen_base:
+        # Freeze the base distribution parameters
+        for param in flow.base.parameters():
+            param.requires_grad = False
+
+    flow = flow.to(device.type)                            
 
     optimizer = torch.optim.Adam(flow.parameters(), lr=learning_rate)
 

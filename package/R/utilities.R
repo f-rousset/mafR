@@ -17,7 +17,7 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NUL
     if (verbose) cat("\nInitializing python session... ")
     MAF_density_estimation <- MAF_conditional_density_estimation <- 
       MAF_predict_cond <- MAF_predict_nocond <- MAF_simulate_cond <- 
-      MAF_transform <- py_to_torch <- get_gpu_info <- NULL
+      MAF_transform <- py_to_torch <- get_gpu_info<- to_zuko_gmm <- NULL
     # reticulate::source_python(paste0(Infusion::projpath(),"/../MAF-R/MAF.py"))
     
     infile <- system.file('python', "MAF.py", package='mafR')
@@ -35,6 +35,11 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NUL
       envir$py_to_torch <- py_to_torch
       # the Python source has also provided get_gpu_info(), used below only.
       envir$is_set <- TRUE
+      #
+      infile <- system.file('python', "GMM.py", package='mafR')
+      chk <- reticulate::source_python(infile)
+      envir$to_zuko_gmm <- to_zuko_gmm
+      #
       ## Python packages to be called from R
       torch <- envir$torch <- reticulate::import("torch")
       envir$device <- torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
@@ -49,7 +54,8 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NUL
   envir
 }
 
-# Available but not used in programming:
+# Available but not used in programming: 
+# (idiom is instead to use ::r_to_py at R level, and py_to_torch() in the python code)
 .r_to_torch <- function(x, py_handle, device) {
   x <- reticulate::r_to_py(x) # to numpy.ndarray...
   py_handle$py_to_torch(x, device$type)
