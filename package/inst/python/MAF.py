@@ -3,6 +3,7 @@
 import torch
 import torch.utils.data as data
 import numpy as np
+import time
 import zuko
 
 def py_to_torch(X, devtype):
@@ -137,7 +138,6 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     Returns:
     - The trained flow model.
     """
-    
     y_train = py_to_torch(y_train, device.type)        
     y_test = py_to_torch(y_test, device.type)        
     x_train = py_to_torch(x_train, device.type)        
@@ -163,6 +163,7 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
     best_loss = float('inf')
     patience_counter = 0
 
+    start_time = time.time()
     for epoch in range(max_epochs):
         losses = []
         for y, x in trainloader:
@@ -191,7 +192,7 @@ def MAF_conditional_density_estimation(y_train, x_train, y_test, x_test, feature
         if patience_counter >= patience:
             print(f'Early stopping after {epoch + 1} epochs due to no improvement in validation loss.')
             break
-    
+    flow.train_time = time.time() - start_time
     return flow
 
 def MAF_predict_cond(density, Y, cond, device, batchsize=4000):

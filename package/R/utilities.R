@@ -46,7 +46,7 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NUL
       if (is.null(GPU_mem) && torch_device != "cpu") envir$gpu_memory <- 
         .get_GPU_mem(GPU_mem, torch_device, get_gpu_info)
       # Handle to the eval environ of main Python module:
-      envir$py_main <- reticulate::import_main(convert = FALSE) 
+      envir$py_main <- reticulate::import_main(convert = FALSE) # cf Infusion sources for its use
       if (verbose) cat("done.\n")
       envir
     }

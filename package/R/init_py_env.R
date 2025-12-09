@@ -67,7 +67,7 @@ init_py_env <- function(
   mc  <- match.call()
   if (utils::packageVersion("reticulate")>="1.42.0") {
     mc[[1]]  <- get(".reticulate_install_1.42.0", asNamespace("mafR"), inherits=FALSE)
-    eval(mc,parent.frame())
+    eval(mc,parent.frame()) # called with all the booleans.
   } else {
     stop("'reticulate' version 1.42.0 or higher is needed to run init_py_env().")
   }
