@@ -20,6 +20,5 @@
   \code{r_to_torch} returns a 32-bit floating-point \pkg{torch} tensor allocated on the given \code{device}.
 }
 \examples{
-my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
-my_env <- get_py_MAF_handle(my_env, reset=FALSE, torch_device="cpu")
+# See help("get_py_MAF_handle") for session setup, providing 'py_handle' argument in particular.
 }

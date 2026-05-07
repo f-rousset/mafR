@@ -14,18 +14,20 @@
 get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NULL,
                               verbose=TRUE) {
   if (reset || ! envir$is_set) {
-    if (verbose) cat("\nInitializing python session... ")
+    if (verbose) cat("\nInitializing python session... ") # or 'evaluation' environment.
+    # != init sensu-python virtual environment: init_py_env() must have been called.
     MAF_density_estimation <- MAF_conditional_density_estimation <- 
       MAF_predict_cond <- MAF_predict_nocond <- MAF_simulate_cond <- 
-      MAF_transform <- py_to_torch <- get_gpu_info<- to_zuko_gmm <- NULL
+      MAF_transform <- py_to_torch <- get_gpu_info <- to_zuko_gmm <- NULL
     # reticulate::source_python(paste0(Infusion::projpath(),"/../MAF-R/MAF.py"))
     
     infile <- system.file('python', "MAF.py", package='mafR')
-    chk <- try(reticulate::source_python(infile))
+    chk <- try(reticulate::source_python(infile)) # this provides objects in the present R closure!
     if (inherits(chk,"try-error")) {
-      message("you need a proprely set up python environment to use 'mafR'.")
+      message("you need a properly set up python environment to use 'mafR': cf. init_py_env().")
       return(attr(chk,"condition")$message)
     } else {
+      # objects are no longer NULL
       envir$MAF_density_estimation <- MAF_density_estimation
       envir$MAF_conditional_density_estimation <- MAF_conditional_density_estimation
       envir$MAF_predict_cond <- MAF_predict_cond

@@ -21,15 +21,25 @@
   If successful, \code{get_py_MAF_handle} returns the modified input environment. 
   If sourcing the Python code provided by \pkg{mafR} failed (presumably from trying to use an improperly set-up Python environment), the error condition message is returned.
 }
+\seealso{\code{\link{init_py_env}}, \code{\link{control_py_env}}}
 \examples{
-# Initialization of Python session:
+\dontrun{ # too slow for CRAN checks
+# Initialization of python virtual environment:
+init_py_env(test_cuda=FALSE)
+
+# Initialization of python session (defines functions etc. 
+#   in python session and provide access to them from R):    
+#
 my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
-my_env <- get_py_MAF_handle(my_env, reset=FALSE, torch_device="cpu")
-    
-if (inherits(my_env,"environment"))  {
-    # => provides access to:
-    my_env$torch # Imported Python package (result of reticulate::import("torch"))
-    my_env$device # the torch_device
-    # and to internal definitions for MAF training 
+py_handle <- get_py_MAF_handle(my_env, reset=FALSE, torch_device="cpu")
+
+# => get_py_MAF_handle() has added objects in myenv:
+my_env$torch # Imported Python package (result of reticulate::import("torch"))
+my_env$device # the torch_device
+# and functions for MAF training, such as myenv$MAF_density_estimation.
+
+# The returned 'py_handle' can be used by oher functions, e.g.:
+control_py_env(py_handle, seed=0L)
+# alters the seed in the python session.
 }
 }

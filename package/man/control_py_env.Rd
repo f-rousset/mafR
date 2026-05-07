@@ -23,10 +23,12 @@ Numeric: passed (as integer value) to \code{torch.random.manual_seed}.
 \value{
 Returns NULL invisibly.
 }
+\seealso{\code{\link{get_py_MAF_handle}}}
 \examples{
-## Initialization of Python session:
-my_env <- list2env(list(is_set=FALSE),parent = emptyenv())
-py_handle <- get_py_MAF_handle(my_env, reset=FALSE, torch_device="cpu")
+# See help("get_py_MAF_handle") for basic usage
 
+# The following test of the first argument may be useful in broader contexts:
+\dontrun{
 if (inherits(py_handle,"environment"))  control_py_env(py_handle, seed=0L)
+}
 }

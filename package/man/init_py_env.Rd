@@ -35,10 +35,13 @@ or change the PATH variable:
 On the WSL, I found that the symbolic link is overwritten each time the WSL is restarted. 
 }
 \value{Returns NULL invisibly.}
+\seealso{\code{\link{get_py_MAF_handle}}}
 \examples{
-\dontrun{
-init_py_env()
-init_py_env(test_cuda=TRUE)
+# See help("get_py_MAF_handle") for basic usage
+
+# The following test may be useful in broader contexts:
+\dontrun{ # too slow for CRAN checks
+if ( ! reticulate::py_available(initialize = FALSE)) init_py_env(test_cuda=FALSE)
 }
 }
 

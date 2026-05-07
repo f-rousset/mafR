@@ -3,8 +3,8 @@ Type: Package
 Title: Interface for Masked Autoregressive Flows 
 Description: Interfaces the 'python' library 'zuko' implementing Masked Autoregressive Flows. See Rozet, Divo and Schnake (2023) <doi:10.5281/zenodo.7625672> and Papamakarios, Pavlakou and Murray (2017) <doi:10.48550/arXiv.1705.07057>.  
 Encoding: UTF-8
-Version: 1.1.11
-Date: 2025-12-09
+Version: 1.1.14
+Date: 2026-05-07
 Imports: reticulate (>= 1.42.0)
 Depends: R (>= 3.6.0)
 Authors@R: c(person("Jean-Michel", "Marin", role = c("aut","cph")),
