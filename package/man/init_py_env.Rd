@@ -8,11 +8,15 @@ Initialize the required \code{Python} environment with the required modules, usi
 }
 \usage{
 init_py_env(
-    cuda=FALSE, test_cuda=cuda, test_dynamo=TRUE, force=FALSE,
-    test_torch=test_cuda || test_dynamo,
+    module="zuko", # default value will surely change in some future version!
+    # Three arguments ignored when module != "zuko":
+    cuda=FALSE, test_cuda=cuda, est_dynamo=TRUE, 
+    #
+    force=FALSE, test_torch=test_cuda || test_dynamo,
     verbose=interactive())
 }
 \arguments{
+\item{module}{Either \code{"zuko"} or \code{"NLE"}.}
 \item{cuda}{Boolean: Whether to install cuda device (only needed once).}
 \item{test_cuda}{Boolean: whether to test that cuda device can be used.}
 \item{test_dynamo}{Boolean: whether to test that \code{"torch._dynamo"} module can be imported. In particular, this test whether libstdc++ is accessible where this module expects it. See Details if the test fails}
@@ -41,7 +45,8 @@ On the WSL, I found that the symbolic link is overwritten each time the WSL is r
 
 # The following test may be useful in broader contexts:
 \dontrun{ # too slow for CRAN checks
-if ( ! reticulate::py_available(initialize = FALSE)) init_py_env(test_cuda=FALSE)
+if ( ! reticulate::py_available(initialize = FALSE)) 
+  init_py_env(module="zuko",test_cuda=FALSE)
 }
 }
 

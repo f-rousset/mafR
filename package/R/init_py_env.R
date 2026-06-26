@@ -1,3 +1,10 @@
+# On cluster with limited disk space in home directory: 
+# genotoul installs r-reticulate in /home/frousset/.local/
+# so we create a symbolic link as suggested in 
+#    https://bioinfo.genotoul.fr/index.php/faq/software_faq/ (cf 'overquota')
+# mkdir ~/work/.local
+# ln -s ~/work/.local   ~/.local
+
 # For comments on wsl see infos in my langages/wsl/ subdir
 .reticulate_install_1.42.0 <- function(
     cuda=FALSE, test_cuda=cuda, test_dynamo=TRUE, force=FALSE, 
@@ -53,22 +60,47 @@
   invisible(NULL)
 }
 
-# On cluster with limited disk space in home directory: 
-# genotoul installs r-reticulate in /home/frousset/.local/
-# so we create a symbolic link as suggested in 
-#    https://bioinfo.genotoul.fr/index.php/faq/software_faq/ (cf 'overquota')
-# mkdir ~/work/.local
-# ln -s ~/work/.local   ~/.local
+.reticulate_install_sbi <- function(
+    force=FALSE, test_torch=TRUE,
+    verbose=interactive(), ...
+) {
+  if (force || 
+      ! length(reticulate::miniconda_path())) {
+    if (verbose) cat("\n install_miniconda()... \n")
+    reticulate::install_miniconda(force=force) # should be able to control the path?
+  }
+  if (verbose) cat("Declare Python requirements... \n")
+  
+  reticulate::py_require(packages="torch") #
+  reticulate::py_require(packages="numpy") #
+  reticulate::py_require(packages="sbi") #
+  
 
-init_py_env <- function(
+  if (test_torch && verbose) cat("test torch... \n")
+  if (test_torch) Itorch <- reticulate::import("torch")
+  invisible(NULL)
+}
+
+
+init_py_env <- function(module="zuko",
   cuda=FALSE, test_cuda=cuda, test_dynamo=TRUE, force=FALSE,
   test_torch=test_cuda || test_dynamo,
   verbose=interactive()) {
-  mc  <- match.call()
-  if (utils::packageVersion("reticulate")>="1.42.0") {
-    mc[[1]]  <- get(".reticulate_install_1.42.0", asNamespace("mafR"), inherits=FALSE)
-    eval(mc,parent.frame()) # called with all the booleans.
-  } else {
-    stop("'reticulate' version 1.42.0 or higher is needed to run init_py_env().")
+  if (missing(module)) {
+    warning("Provide value for 'module' argument of mafR::init_py_env() to ensure back-compatibility.",
+            immediate. = TRUE)
   }
+  mc  <- match.call()
+  if (module=="zuko") {
+    if (utils::packageVersion("reticulate")>="1.42.0") {
+      mc[[1]]  <- get(".reticulate_install_1.42.0", asNamespace("mafR"), inherits=FALSE)
+      eval(mc,parent.frame()) # called with all the booleans.
+    } else {
+      stop("'reticulate' version 1.42.0 or higher is needed to run init_py_env().")
+    }
+  } else if (module=="NLE") {
+    mc[[1]]  <- get(".reticulate_install_sbi", asNamespace("mafR"), inherits=FALSE)
+    eval(mc,parent.frame()) # called with all the booleans.
+  } else stop("This value of the 'module' argument is not handled.")
 }
+
