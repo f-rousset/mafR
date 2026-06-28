@@ -21,61 +21,61 @@ def py_to_torch(X, devtype):
         
     return X
 
-def NLE_conditional_density_estimation(objects, theta, x, **kwargs):
+def NLE_conditional_density_estimation(density, theta, x, **kwargs):
   
-    if objects is None:
+    if density is None:
         trainer = NLE(density_estimator="maf", device=device)
     else:
-        trainer = objects['trainer']
+        trainer = density['trainer']
 
     theta = py_to_torch(theta, device.type)
     x = py_to_torch(x, device.type)        
 
-    density = trainer.append_simulations(theta, x).train(
+    pdf = trainer.append_simulations(theta, x).train(
             training_batch_size=128,
             show_train_summary=False
         )
-    objects = {'trainer': trainer, 
-               'density': density}
+    density = {'trainer': trainer, 
+               'pdf': pdf}
 
-    return objects
+    return density
 
-def sbi_density_estimation(objects, x, **kwargs):
+def sbi_density_estimation(density, x, **kwargs):
   
-    if objects is None:
+    if density is None:
         trainer = MarginalTrainer(density_estimator="nsf")
     else:
-        trainer = objects['trainer']
+        trainer = density['trainer']
         
     x = py_to_torch(x, device.type)        
-    density = trainer.append_samples(x).train()
-    objects = {'trainer': trainer, 
-               'density': density}
+    pdf = trainer.append_samples(x).train()
+    density = {'trainer': trainer, 
+               'pdf': pdf}
                
-    return objects
+    return density
 
 
 
-def MAF_predict_cond(objects, Y, cond, **kwargs):
+def MAF_predict_cond(density, Y, cond, **kwargs):
     nr = Y.shape[0]
     if (nr == 0):
         return None
     
-    density = objects['density']
+    pdf = density['pdf']
     cond = py_to_torch(cond, device.type)        
     Y = py_to_torch(Y, device.type)
-    logLs = density.log_prob(Y.unsqueeze(0), cond).detach().numpy()
+    logLs = pdf.log_prob(Y.unsqueeze(0), cond).detach().numpy()
 
     return logLs
   
-def MAF_predict_nocond(objects, Y, **kwargs):
-    nr = Y.shape[0]
+def MAF_predict_nocond(density, Y, **kwargs):
+    nr = Y.shape[0]DE
     if (nr == 0):
         return None
     
-    density = objects['density']
+    pdf = density['pdf']
     Y = py_to_torch(Y, device.type)
-    logLs = density.log_prob(Y).detach().numpy()
+    logLs = pdf.log_prob(Y).detach().numpy()
 
     return logLs
 
