@@ -3,7 +3,8 @@ get_py_NLE_handle <- function(envir, reset=FALSE, verbose=TRUE) {
   if (reset || ! envir$is_set) {
     if (verbose) cat("\nInitializing python session... ") # or 'evaluation' environment.
     # != init sensu-python virtual environment: init_py_env() must have been called.
-    NLE_density_estimation <- NLE_logL <- py_to_torch <- NULL
+    NLE_conditional_density_estimation <- sbi_density_estimation <- 
+      MAF_predict_cond <- MAF_predict_nocond <- py_to_torch <- NULL
 
     infile <- system.file('python', "NLE.py", package='mafR')
     chk <- try(reticulate::source_python(infile)) # this provides objects in the present R closure!
@@ -12,8 +13,10 @@ get_py_NLE_handle <- function(envir, reset=FALSE, verbose=TRUE) {
       return(attr(chk,"condition")$message)
     } else {
       # objects are no longer NULL
-      envir$NLE_density_estimation <- NLE_density_estimation
-      envir$NLE_logL <- NLE_logL
+      envir$NLE_conditional_density_estimation <- NLE_conditional_density_estimation
+      envir$sbi_density_estimation <- sbi_density_estimation
+      envir$MAF_predict_cond <- MAF_predict_cond
+      envir$MAF_predict_nocond <- MAF_predict_nocond
       envir$py_to_torch <- py_to_torch
       envir$is_set <- TRUE
       #

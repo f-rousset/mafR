@@ -10,7 +10,7 @@ Initialize the required \code{Python} environment with the required modules, usi
 init_py_env(
     module="zuko", # default value will surely change in some future version!
     # Three arguments ignored when module != "zuko":
-    cuda=FALSE, test_cuda=cuda, est_dynamo=TRUE, 
+    cuda=FALSE, test_cuda=cuda, test_dynamo=TRUE, 
     #
     force=FALSE, test_torch=test_cuda || test_dynamo,
     verbose=interactive())

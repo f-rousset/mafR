@@ -19,9 +19,8 @@ get_py_MAF_handle <- function(envir, reset=FALSE, torch_device="cpu",GPU_mem=NUL
     MAF_density_estimation <- MAF_conditional_density_estimation <- 
       MAF_predict_cond <- MAF_predict_nocond <- MAF_simulate_cond <- 
       MAF_transform <- py_to_torch <- get_gpu_info <- to_zuko_gmm <- NULL
-    # reticulate::source_python(paste0(Infusion::projpath(),"/../MAF-R/MAF.py"))
-    
-    infile <- system.file('python', "MAF.py", package='mafR')
+
+    infile <- system.file('python', "MAFzuko.py", package='mafR')
     chk <- try(reticulate::source_python(infile)) # this provides objects in the present R closure!
     if (inherits(chk,"try-error")) {
       message("you need a properly set up python environment to use 'mafR': cf. init_py_env().")

@@ -3,13 +3,13 @@
 import os
 import torch, numpy as np
 from sbi.inference import NLE
+from sbi.inference import MarginalTrainer
 from sbi.utils import BoxUniform
 import time
 import pickle
 import sys
 
 device = torch.device("cpu")
-inference = NLE(density_estimator="maf", device=device)
 
 def py_to_torch(X, devtype):
     X = np.copy(X) # "he given NumPy array is not writable, and PyTorch does not support non-writable tensors."
@@ -21,28 +21,61 @@ def py_to_torch(X, devtype):
         
     return X
 
-def NLE_density_estimation(theta, x, **kwargs):
+def NLE_conditional_density_estimation(objects, theta, x, **kwargs):
+  
+    if objects is None:
+        trainer = NLE(density_estimator="maf", device=device)
+    else:
+        trainer = objects['trainer']
 
-    theta = py_to_torch(theta, device.type)        
+    theta = py_to_torch(theta, device.type)
     x = py_to_torch(x, device.type)        
 
-    logLsurf = inference.append_simulations(theta, x).train(
+    density = trainer.append_simulations(theta, x).train(
             training_batch_size=128,
             show_train_summary=False
         )
+    objects = {'trainer': trainer, 
+               'density': density}
 
-    return logLsurf
+    return objects
+
+def sbi_density_estimation(objects, x, **kwargs):
+  
+    if objects is None:
+        trainer = MarginalTrainer(density_estimator="nsf")
+    else:
+        trainer = objects['trainer']
+        
+    x = py_to_torch(x, device.type)        
+    density = trainer.append_samples(x).train()
+    objects = {'trainer': trainer, 
+               'density': density}
+               
+    return objects
 
 
 
-def NLE_logL(logLsurf, Y, cond, **kwargs):
+def MAF_predict_cond(objects, Y, cond, **kwargs):
     nr = Y.shape[0]
     if (nr == 0):
         return None
     
+    density = objects['density']
     cond = py_to_torch(cond, device.type)        
     Y = py_to_torch(Y, device.type)
-    logLs = logLsurf.log_prob(Y.unsqueeze(0), cond).detach().numpy()
+    logLs = density.log_prob(Y.unsqueeze(0), cond).detach().numpy()
+
+    return logLs
+  
+def MAF_predict_nocond(objects, Y, **kwargs):
+    nr = Y.shape[0]
+    if (nr == 0):
+        return None
+    
+    density = objects['density']
+    Y = py_to_torch(Y, device.type)
+    logLs = density.log_prob(Y).detach().numpy()
 
     return logLs
 
