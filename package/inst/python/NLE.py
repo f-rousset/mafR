@@ -35,6 +35,10 @@ def NLE_conditional_density_estimation(density, theta, x, **kwargs):
             training_batch_size=128,
             show_train_summary=False
         )
+        
+    # _____F I X M E____ temporary internal control    
+    print("number of simulations =", trainer.get_simulations()[1].shape[0])    
+        
     density = {'trainer': trainer, 
                'pdf': pdf}
 
@@ -64,18 +68,18 @@ def MAF_predict_cond(density, Y, cond, **kwargs):
     pdf = density['pdf']
     cond = py_to_torch(cond, device.type)        
     Y = py_to_torch(Y, device.type)
-    logLs = pdf.log_prob(Y.unsqueeze(0), cond).detach().numpy()
+    logLs = pdf.log_prob(Y.unsqueeze(0), cond).detach().numpy().squeeze()
 
     return logLs
   
 def MAF_predict_nocond(density, Y, **kwargs):
-    nr = Y.shape[0]DE
+    nr = Y.shape[0]
     if (nr == 0):
         return None
     
     pdf = density['pdf']
     Y = py_to_torch(Y, device.type)
-    logLs = pdf.log_prob(Y).detach().numpy()
+    logLs = pdf.log_prob(Y).detach().numpy().squeeze()
 
     return logLs
 
