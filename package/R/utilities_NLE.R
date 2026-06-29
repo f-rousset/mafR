@@ -5,6 +5,7 @@ get_py_NLE_handle <- function(envir, reset=FALSE, verbose=TRUE) {
     # != init sensu-python virtual environment: init_py_env() must have been called.
     NLE_conditional_density_estimation <- sbi_density_estimation <- 
       MAF_predict_cond <- MAF_predict_nocond <- py_to_torch <- NULL
+    
 
     infile <- system.file('python', "NLE.py", package='mafR')
     chk <- try(reticulate::source_python(infile)) # this provides objects in the present R closure!
@@ -24,7 +25,11 @@ get_py_NLE_handle <- function(envir, reset=FALSE, verbose=TRUE) {
       torch <- envir$torch <- reticulate::import("torch")
       envir$device <- torch$device(torch_device) # device(type='cuda') or 'mps'; use its $type to test
       # Handle to the eval environ of main Python module:
-      envir$py_main <- reticulate::import_main(convert = FALSE) # cf Infusion sources for its use
+      py_main <- reticulate::import_main(convert = FALSE) 
+      # cf Infusion sources for its use; but also see whether I really need the following objects:
+      py_main$complconddens <- py_main$completedens <- py_main$pardens <- 
+        py_main$postdens <- py_main$jointdens <- py_main$conddens <- NULL
+      envir$py_main <- py_main
       if (verbose) cat("done.\n")
       envir
     }

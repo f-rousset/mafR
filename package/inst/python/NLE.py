@@ -35,15 +35,13 @@ def NLE_conditional_density_estimation(density, theta, x, **kwargs):
             training_batch_size=128,
             show_train_summary=False
         )
-        
-    # _____F I X M E____ temporary internal control    
-    print("number of simulations =", trainer.get_simulations()[1].shape[0])    
-        
     density = {'trainer': trainer, 
                'pdf': pdf}
 
     return density
 
+# The next one is not very useful bc the inference is not iterative 
+# (append_samples() does not _append_ samples!)
 def sbi_density_estimation(density, x, **kwargs):
   
     if density is None:
