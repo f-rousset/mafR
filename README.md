@@ -1,5 +1,7 @@
 [![CRAN](https://www.r-pkg.org/badges/version-ago/mafR)](https://cran.r-project.org/web/packages/mafR)
 
+Marin J, Rousset F (2026). _mafR: Interface for Masked Autoregressive Flows_. 
+
 This package allows one to call from R the implementation of Masked Autoregressive Flows (MAFs) in the `zuko` python package ([Rozet et al. 2023](dx.doi.org/10.5281/zenodo.7625672)).
 It has been designed more specifically for use with the [`Infusion` R package](gitlab.mbb.univ-montp2.fr/francois/Infusion).
 Although the installation of the `mafR` package is trivial, you will need to install a Python environment with appropriate packages in order to be able to use `mafR`.
